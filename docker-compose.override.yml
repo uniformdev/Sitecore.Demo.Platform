@@ -6,7 +6,7 @@ services:
     volumes:
       - ./data/traefik:C:/etc/traefik
     depends_on:
-      cd:
+      cm:
         condition: service_healthy
     networks:
       - demo
@@ -74,7 +74,7 @@ services:
       SITECORE_CONNECTIONSTRINGS_Sitecore.Services.Token.SecurityKey: key=${SITECORE_SERVICES_TOKEN_SECURITYKEY}
       EXM_RENDERER_URL: http://cm
       Sitecore_Horizon_ClientHost: https://${SH_HOST}
-      HOST_CD: http://cd
+      HOST_CD: http://cm
       COVEO_SERVER_URL: ${COVEO_SERVER_URL}
     volumes:
       - ${HOST_LICENSE_FOLDER}:c:\license
@@ -148,72 +148,6 @@ services:
     networks:
       - demo
 
-  cd:
-    isolation: ${ISOLATION}
-    image: ${REGISTRY}demo/lighthouse-xp0-cd:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}-${DEMO_VERSION}
-    entrypoint: powershell.exe -Command "& C:\\tools\\entrypoints\\iis\\Development.ps1 -WatchDirectoryParameters @{ Path = 'C:\\src'; Destination = 'C:\\inetpub\\wwwroot'; ExcludeFiles = @('Web.config'); }"
-    scale: ${CD_CONTAINERS_COUNT}
-    environment:
-      SITECORE_LICENSE_LOCATION: c:\license\license.xml
-      SITECORE_APPSETTINGS_SXAXM:DEFINE: sxaxconnect
-      SITECORE_APPSETTINGS_ENV:DEFINE: Docker
-      SITECORE_APPSETTINGS_UNICORN:DEFINE: Disabled
-      SITECORE_APPSETTINGS_PUBLISHINGSERVICE:DEFINE: Disabled
-      SOLR_CORE_PREFIX_NAME: sitecore
-      SITECORE_APPSETTINGS_INTEGRATIONS:DEFINE: Salesforce
-      Sitecore_ConnectionStrings_Security: Data Source=mssql;Initial Catalog=Sitecore.Core;User ID=sa;Password=${SQL_SA_PASSWORD}
-      Sitecore_ConnectionStrings_Web: Data Source=mssql;Initial Catalog=Sitecore.Web;User ID=sa;Password=${SQL_SA_PASSWORD}
-      Sitecore_ConnectionStrings_Messaging: Data Source=mssql;Initial Catalog=Sitecore.Messaging;User ID=sa;Password=${SQL_SA_PASSWORD}
-      Sitecore_ConnectionStrings_ExperienceForms: Data Source=mssql;Initial Catalog=Sitecore.ExperienceForms;User ID=sa;Password=${SQL_SA_PASSWORD}
-      Sitecore_ConnectionStrings_Exm.Master: Data Source=mssql;Initial Catalog=Sitecore.Exm.master;User ID=sa;Password=${SQL_SA_PASSWORD}
-      Sitecore_ConnectionStrings_Solr.Search: http://solr:8983/solr
-      Sitecore_ConnectionStrings_XConnect.Collection: http://xconnect
-      Sitecore_ConnectionStrings_Xdb.MarketingAutomation.Operations.Client: http://xconnect
-      Sitecore_ConnectionStrings_Xdb.MarketingAutomation.Reporting.Client: http://xconnect
-      Sitecore_ConnectionStrings_Xdb.ReferenceData.Client: http://xconnect
-      Sitecore_ConnectionStrings_Sitecore.Services.Token.SecurityKey: key=${SITECORE_SERVICES_TOKEN_SECURITYKEY}
-      Sitecore_License: ${SITECORE_LICENSE}
-      EXM_RENDERER_URL: http://cm
-      COVEO_SERVER_URL: ${COVEO_SERVER_URL}
-    volumes:
-      - ${HOST_LICENSE_FOLDER}:c:\license
-      - .\data\cd\src:C:\src
-      - .\data\cd\backup:c:\backup
-    depends_on:
-      mssql:
-        condition: service_healthy
-      ps:
-        condition: service_healthy
-      solr:
-        condition: service_healthy
-      xconnect:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "powershell", "ps"]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.middlewares.force-STS-Header.headers.forceSTSHeader=true"
-      - "traefik.http.middlewares.force-STS-Header.headers.stsSeconds=31536000"
-      - "traefik.http.routers.cd-secure.entrypoints=websecure"
-      - "traefik.http.routers.cd-secure.rule=Host(`${CD_HOST}`)"
-      - "traefik.http.routers.cd-secure.tls=true"
-      - "traefik.http.routers.cd-secure.middlewares=force-STS-Header"
-    networks:
-      demo:
-        aliases:
-          - "${CD_HOST}"
-
-  smtp:
-    image: maildev/maildev
-    command: ["--smtp", "25", "--web", "80"]
-    isolation: ${ISOLATION}
-    ports:
-      - "44025:25"
-      - "44026:80"
-    networks:
-      - demo
-    scale: ${SMTP_CONTAINERS_COUNT}
-
   init:
     healthcheck:
       test: ["CMD", "powershell", "ps"]
@@ -222,7 +156,7 @@ services:
     environment:
       ADMIN_PASSWORD: ${SITECORE_ADMIN_PASSWORD}
       ADMIN_USER_NAME: "superuser"
-      HOST_CD: "http://cd"
+      HOST_CD: "http://cm"
       HOST_CM: "http://cm"
       HOST_PS: "http://ps"
       HOST_ID: "http://id"

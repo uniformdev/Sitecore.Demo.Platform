@@ -58,17 +58,6 @@ services:
     depends_on:
       - solution
 
-  cd:
-    isolation: ${ISOLATION}
-    image: ${REGISTRY}demo/lighthouse-xp0-cd:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}-${DEMO_VERSION}
-    build:
-      context: docker\images\windows\demo-cd
-      args:
-        SOLUTION_IMAGE: ${REGISTRY}build/lighthouse-solution:${SITECORE_VERSION}-${NANOSERVER_VERSION}-${SOLUTION_VERSION}
-        BASE_IMAGE: ${REGISTRY}demo/base/lighthouse-xp1-modules-base-cd:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}-${BASE_MODULE_VERSION}
-    depends_on:
-      - solution
-
   xconnect:
     image: ${REGISTRY}demo/lighthouse-xp0-xconnect:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}-${DEMO_VERSION}
     build:
