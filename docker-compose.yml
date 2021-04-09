@@ -2,6 +2,9 @@ version: "2.4"
 services:
   traefik:
     isolation: ${TRAEFIK_ISOLATION}
+    dns:
+    - 8.8.8.8
+    - 4.4.4.4
     image: ${TRAEFIK_IMAGE}
     command:
       - "--ping"
@@ -27,7 +30,10 @@ services:
         condition: service_healthy
   mssql:
     isolation: ${ISOLATION}
-    image: ${SITECORE_DOCKER_REGISTRY}sxp/sitecore-xp0-mssql:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
+    dns:
+    - 8.8.8.8
+    - 4.4.4.4
+    image: ${SITECORE_DOCKER_REGISTRY:-scr.sitecore.com}sxp/sitecore-xp0-mssql:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
     environment:
       SA_PASSWORD: ${SQL_SA_PASSWORD}
       SITECORE_ADMIN_PASSWORD: ${SITECORE_ADMIN_PASSWORD}
@@ -43,14 +49,20 @@ services:
     isolation: ${ISOLATION}
     ports:
       - "8984:8983"
-    image: ${SITECORE_DOCKER_REGISTRY}sxp/sitecore-xp0-solr:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
+    dns:
+    - 8.8.8.8
+    - 4.4.4.4
+    image: ${SITECORE_DOCKER_REGISTRY:-scr.sitecore.com}sxp/sitecore-xp0-solr:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
     volumes:
       - type: bind
         source: .\solr-data
         target: c:\data
   id:
     isolation: ${ISOLATION}
-    image: ${SITECORE_DOCKER_REGISTRY}sxp/sitecore-id:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
+    dns:
+    - 8.8.8.8
+    - 4.4.4.4
+    image: ${SITECORE_DOCKER_REGISTRY:-scr.sitecore.com}sxp/sitecore-id:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
     environment:
       Sitecore_Sitecore__IdentityServer__SitecoreMemberShipOptions__ConnectionString: Data Source=mssql;Initial Catalog=Sitecore.Core;User ID=sa;Password=${SQL_SA_PASSWORD}
       Sitecore_Sitecore__IdentityServer__AccountOptions__PasswordRecoveryUrl: https://${CM_HOST}/sitecore/login?rc=1
@@ -73,7 +85,10 @@ services:
       - "traefik.http.routers.id-secure.tls=true"
   cm:
     isolation: ${ISOLATION}
-    image: ${SITECORE_DOCKER_REGISTRY}sxp/sitecore-xp0-cm:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
+    dns:
+    - 8.8.8.8
+    - 4.4.4.4
+    image: ${SITECORE_DOCKER_REGISTRY:-scr.sitecore.com}sxp/sitecore-xp0-cm:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
     depends_on:
       id:
         condition: service_started
@@ -116,7 +131,10 @@ services:
       - "traefik.http.routers.cm-secure.middlewares=force-STS-Header"
   xconnect:
     isolation: ${ISOLATION}
-    image: ${SITECORE_DOCKER_REGISTRY}sxp/sitecore-xp0-xconnect:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
+    dns:
+    - 8.8.8.8
+    - 4.4.4.4
+    image: ${SITECORE_DOCKER_REGISTRY:-scr.sitecore.com}sxp/sitecore-xp0-xconnect:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
     ports:
       - "8081:80"
     depends_on:
@@ -143,7 +161,10 @@ services:
       timeout: 300s
   xdbsearchworker:
     isolation: ${ISOLATION}
-    image: ${SITECORE_DOCKER_REGISTRY}sxp/sitecore-xp0-xdbsearchworker:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
+    dns:
+    - 8.8.8.8
+    - 4.4.4.4
+    image: ${SITECORE_DOCKER_REGISTRY:-scr.sitecore.com}sxp/sitecore-xp0-xdbsearchworker:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
     depends_on:
       xconnect:
         condition: service_healthy
@@ -160,7 +181,10 @@ services:
       timeout: 300s
   xdbautomationworker:
     isolation: ${ISOLATION}
-    image: ${SITECORE_DOCKER_REGISTRY}sxp/sitecore-xp0-xdbautomationworker:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
+    dns:
+    - 8.8.8.8
+    - 4.4.4.4
+    image: ${SITECORE_DOCKER_REGISTRY:-scr.sitecore.com}sxp/sitecore-xp0-xdbautomationworker:${SITECORE_VERSION}-${WINDOWSSERVERCORE_VERSION}
     depends_on:
       xconnect:
         condition: service_healthy
